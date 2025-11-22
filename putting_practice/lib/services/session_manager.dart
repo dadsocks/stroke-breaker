@@ -203,4 +203,18 @@ class SessionManager extends ChangeNotifier {
     if (practiceRepository == null) return const {};
     return practiceRepository!.fetchAverageStrokesGainedByDistance();
   }
+
+  Future<void> undoLastHole() async {
+    final session = _session;
+    if (session == null || session.holes.isEmpty) return;
+
+    final updatedHoles = [...session.holes];
+    final removed = updatedHoles.removeLast();
+    _session = session.copyWith(holes: updatedHoles);
+    _currentScenario = removed.scenario;
+    _pendingFirstFeedback = null;
+    _selectedSecondDistance = null;
+    await storage.saveSession(_session!);
+    notifyListeners();
+  }
 }
